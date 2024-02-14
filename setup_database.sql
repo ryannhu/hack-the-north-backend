@@ -1,6 +1,5 @@
 
 -- SQL script to create three tables: Person, Skill, and PersonSkill
--- and insert data into them.
 
 -- Create the Person table
 CREATE TABLE IF NOT EXISTS Person (
@@ -8,7 +7,8 @@ CREATE TABLE IF NOT EXISTS Person (
     name TEXT NOT NULL,
     company TEXT,
     email TEXT NOT NULL,
-    phone TEXT
+    phone TEXT,
+    checkin BOOLEAN DEFAULT 0
 );
 
 -- Create the Skill table
@@ -26,4 +26,20 @@ CREATE TABLE IF NOT EXISTS PersonSkill (
     FOREIGN KEY (person_id) REFERENCES Person(person_id),
     FOREIGN KEY (skill_id) REFERENCES Skill(skill_id)
 );
+
+CREATE TABLE IF NOT EXISTS Hardware (
+    hardware_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    hardware_name TEXT,
+    quantity_available INTEGER CHECK(quantity_available >= 0)
+);
+
+CREATE TABLE IF NOT EXISTS HardwareLoan (
+    loan_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    person_id INTEGER NOT NULL,
+    hardware_id INTEGER NOT NULL,
+    FOREIGN KEY (person_id) REFERENCES Person(person_id),
+    FOREIGN KEY (hardware_id) REFERENCES Hardware(hardware_id)
+);
+
+
 

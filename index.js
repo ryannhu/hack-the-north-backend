@@ -180,6 +180,51 @@ app.put("/user/:id", async (req, res) => {
   }
 });
 
+app.get("/checked-in/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const checkedIn = await database.get(
+      "SELECT checkin FROM Person WHERE person_id = ?",
+      id,
+    );
+    // convert to boolean
+    checkedIn.checkin = !!checkedIn.checkin;
+    res.json(checkedIn);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Failed to fetch check-in status" });
+  }
+});
+
+app.put("/check-in/:id", async (req, res) => {
+  const { id } = req.params;
+
+
+  try {
+    await database.run(
+      "UPDATE Person SET checkin = 1 WHERE person_id = ?",
+      id,
+    );
+    res.json({ checkin });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Failed to update check-in status" });
+  }
+});
+
+// Sign out hardware
+app.post("/hardware/checkout", async (req, res) => {
+  const { user_id, hardware_id } = req.body;
+
+  
+});
+
+// Return hardware
+app.post("/hardware/return", async (req, res) => {
+  const { loan_id } = req.body;
+
+});
+
 app.listen(port, () => {
   console.log(`Example REST Express app listening at http://localhost:${port}`);
 });

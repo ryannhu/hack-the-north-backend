@@ -3,12 +3,13 @@ import sqlite3
 import sys
 
 # json_file should be the first argument passed to the script from the command line
-json_file = sys.argv[1]
+hacker_json_file = sys.argv[1]
+hardware_json_file = sys.argv[2]
 conn = sqlite3.connect('hackers.db')
 
 c = conn.cursor()
 
-with open(json_file) as f:
+with open(hacker_json_file) as f:
     data = json.load(f)
 
 # JSON structure is the following
@@ -48,6 +49,16 @@ for person in data:
         c.execute('INSERT INTO PersonSkill (person_id, skill_id, rating) VALUES (?, ?, ?)',
                        (person_id, skill_id, skill['rating']))
         
+
+# insert mock hardware data
+with open(hardware_json_file) as f:
+    data = json.load(f)  
+
+for hardware in data:
+    c.execute('INSERT INTO Hardware (hardware_name, quantity_available) VALUES (?, ?)',
+              (hardware["hardware_name"], hardware["quantity_available"]))
+
+
 conn.commit()
 
 conn.close()

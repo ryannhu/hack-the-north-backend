@@ -1,0 +1,22 @@
+[
+    {
+      "hardware_name": "Laptop",
+      "quantity_available": 10
+    },
+    {
+      "hardware_name": "Projector",
+      "quantity_available": 5
+    },
+    {
+      "hardware_name": "3D Printer",
+      "quantity_available": 2
+    },
+    {
+      "hardware_name": "VR Headset",
+      "quantity_available": 4
+    },
+    {
+      "hardware_name": "External Hard Drive",
+      "quantity_available": 8
+    }
+  ]
