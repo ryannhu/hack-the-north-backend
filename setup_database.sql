@@ -44,13 +44,23 @@ CREATE TABLE IF NOT EXISTS HardwareLoan (
     FOREIGN KEY (hardware_id) REFERENCES Hardware(hardware_id)
 );
 
-CREATE TABLE IF NOT EXISTS EVENTS
+CREATE TABLE IF NOT EXISTS Events
 (
     event_id INTEGER PRIMARY KEY AUTOINCREMENT,
     event_name TEXT NOT NULL,
     event_type TEXT NOT NULL,
     start_time DATETIME NOT NULL,
     end_time DATETIME NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS EventScan
+(
+    event_id INTEGER NOT NULL,
+    person_id INTEGER NOT NULL,
+    scan_time DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (event_id) REFERENCES EVENTS(event_id),
+    FOREIGN KEY (person_id) REFERENCES Person(person_id)
+    UNIQUE (event_id, person_id)
 );
 
 

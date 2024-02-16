@@ -34,5 +34,29 @@
         "event_type": "Tech Workshop",
         "start_time": "2024-02-15 00:27:58",
         "end_time": "2024-02-15 02:27:58"
+    },
+    {
+        "event_name": "Snack Break",
+        "event_type": "Food",
+        "start_time": "2024-02-16 03:30:46",
+        "end_time": "2024-02-16 04:12:46"
+    },
+    {
+        "event_name": "Dessert Break",
+        "event_type": "Food",
+        "start_time": "2024-02-15 17:10:55",
+        "end_time": "2024-02-15 17:47:55"
+    },
+    {
+        "event_name": "Snack Break",
+        "event_type": "Food",
+        "start_time": "2024-02-15 20:20:28",
+        "end_time": "2024-02-15 21:00:28"
+    },
+    {
+        "event_name": "Lunch Break",
+        "event_type": "Food",
+        "start_time": "2024-02-15 15:43:57",
+        "end_time": "2024-02-15 16:49:57"
     }
 ]

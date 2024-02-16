@@ -52,17 +52,17 @@ app.get("/users", async (req, res) => {
 app.get("/user/:id", async (req, res) => {
   try {
     const { id } = req.params;
-    const updatedUser = await database.get(
+    const user = await database.get(
       "SELECT * FROM person WHERE person_id = ?",
       id,
     );
-    const updatedSkills = await database.all(
+    const skills = await database.all(
       "SELECT s.skill, ps.rating FROM PersonSkill ps JOIN Skill s ON ps.skill_id = s.skill_id WHERE ps.person_id = ?",
       id,
     );
-    updatedUser.skills = updatedSkills;
+    user.skills = skills;
 
-    res.json(updatedUser);
+    res.json(user);
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Failed to fetch user" });
@@ -198,8 +198,6 @@ app.get("/checked-in/:id", async (req, res) => {
 
 app.put("/check-in/:id", async (req, res) => {
   const { id } = req.params;
-
-
   try {
     await database.run(
       "UPDATE Person SET checkin = 1 WHERE person_id = ?",
@@ -250,7 +248,7 @@ app.post("/hardware/checkout", async (req, res) => {
   } catch (error) {
     console.error(error);
     await database.run("ROLLBACK")
-    res.json({ error: "Failed to checkout hardware"})
+    res.status(500).json({ error: "Failed to checkout hardware"})
   }
 });
 
@@ -295,7 +293,7 @@ app.post("/hardware/return", async (req, res) => {
   } catch (error) {
     console.error(error);
     await database.run("ROLLBACK")
-    res.json({ error: "Failed to return hardware"})
+    res.status(500).json({ error: "Failed to return hardware"})
   
   }
 
@@ -309,23 +307,99 @@ app.get("/hardware", async (req, res) => {
     res.json(hardware);
   } catch (error) {
     console.error(error)
-    res.json({ error: "Failed to fetch hardware" });
+    res.status(500).json({ error: "Failed to fetch hardware" });
   }
 })
+
+// scan event endpoint
+app.post("/scan", async (req, res) => {
+  const { user_id, event_id } = req.body;
+  try {
+    // check that the user exists
+    const user = await database.get("SELECT * FROM person WHERE person_id = ?", user_id);
+    if (!user) {
+      return res.status(400).json({ error: "User does not exist" });
+    }
+    // check that the event exists
+    const event = await database.get("SELECT * FROM Events WHERE event_id = ?", event_id);
+    if (!event) {
+      return res.status(400).json({ error: "Event does not exist" });
+    }
+    // record the scan
+    await database.run("INSERT INTO EventScan (person_id, event_id, scan_time) VALUES (?, ?, datetime('now'))", [user_id, event_id]);
+    res.json({ message: "Attendance recorded successfully" });
+  } catch (error) {
+    if (error && error.code === 'SQLITE_CONSTRAINT') {
+      console.error(error);
+      res.status(409).json({ error: "A scan record for this event and person already exists." });
+  } else {
+      console.error(error);
+      res.status(500).json({ error: "Failed to record attendance" });
+  }
+  }
+});
+
+// list events scanned for a user
+app.get("/user/events/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    // check that the user exists
+    const user = await database.get("SELECT * FROM person WHERE person_id = ?", id);
+    if (!user) {
+      return res.status(400).json({ error: "User does not exist" });
+    }
+    const events = await database.all(
+      "SELECT e.event_id, e.event_name, e.start_time, e.end_time, es.scan_time FROM Events e JOIN EventScan es ON e.event_id = es.event_id WHERE es.person_id = ?",
+      id
+    );
+    res.json(events);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Failed to fetch events" });
+  }
+});
+
+// list all avaliable events
+app.get("/events", async (req, res) => {
+  try {
+    const events = await database.all("SELECT * FROM Events");
+    res.json(events);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Failed to fetch events" });
+  }
+});
+
 
 app.get("/user/info/:id", async (req, res) => {
   try {
     const { id } = req.params;
+    
     const userInfo = await database.get(
       "SELECT * FROM person WHERE person_id = ?",
       id,
     );
+    if (!userInfo) {
+      return res.status(404).json({ error: "User not found" });
+    }
+    const skills = await database.all(
+      "SELECT s.skill, ps.rating FROM PersonSkill ps JOIN Skill s ON ps.skill_id = s.skill_id WHERE ps.person_id = ?",
+      id,
+    );
+    userInfo.skills = skills;
+
     // get all hardware loan
     const hardwareLoans = await database.all(
       "SELECT * FROM HardwareLoan WHERE person_id = ?",
       id,
     );
+    // get all events scanned
+    const eventsScanned = await database.all(
+      "SELECT e.event_id, e.event_name, e.start_time, e.end_time, es.scan_time FROM Events e JOIN EventScan es ON e.event_id = es.event_id WHERE es.person_id = ?",
+      id
+    );
     userInfo.hardware_loans = hardwareLoans;
+    userInfo.events_scanned = eventsScanned;
     res.json(userInfo);
   } catch (error) {
     console.error(error);

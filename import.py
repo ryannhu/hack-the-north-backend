@@ -5,6 +5,7 @@ import sys
 # json_file should be the first argument passed to the script from the command line
 hacker_json_file = sys.argv[1]
 hardware_json_file = sys.argv[2]
+event_json_file = sys.argv[3]
 conn = sqlite3.connect('hackers.db')
 
 c = conn.cursor()
@@ -58,6 +59,12 @@ for hardware in data:
     c.execute('INSERT INTO Hardware (hardware_name, quantity_available) VALUES (?, ?)',
               (hardware["hardware_name"], hardware["quantity_available"]))
 
+with open(event_json_file) as f:
+    data = json.load(f)
+
+for event in data:
+    c.execute('INSERT INTO Events (event_name, event_type, start_time, end_time) VALUES (?, ?, ?, ?)',
+              (event["event_name"], event["event_type"], event["start_time"], event["end_time"]))
 
 conn.commit()
 
