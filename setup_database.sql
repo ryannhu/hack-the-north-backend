@@ -37,8 +37,20 @@ CREATE TABLE IF NOT EXISTS HardwareLoan (
     loan_id INTEGER PRIMARY KEY AUTOINCREMENT,
     person_id INTEGER NOT NULL,
     hardware_id INTEGER NOT NULL,
+    checkout_time DATETIME DEFAULT CURRENT_TIMESTAMP,
+    return_time DATETIME DEFAULT NULL,
+    returned BOOLEAN DEFAULT 0,
     FOREIGN KEY (person_id) REFERENCES Person(person_id),
     FOREIGN KEY (hardware_id) REFERENCES Hardware(hardware_id)
+);
+
+CREATE TABLE IF NOT EXISTS EVENTS
+(
+    event_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    event_name TEXT NOT NULL,
+    event_type TEXT NOT NULL,
+    start_time DATETIME NOT NULL,
+    end_time DATETIME NOT NULL
 );
 
 

@@ -216,13 +216,121 @@ app.put("/check-in/:id", async (req, res) => {
 app.post("/hardware/checkout", async (req, res) => {
   const { user_id, hardware_id } = req.body;
 
+  try {
+    await database.run("BEGIN")
+
+    // check if there is enough hardware
+    const hardware = await database.get(
+      "SELECT quantity_available FROM Hardware WHERE hardware_id = ?",
+      hardware_id
+    );
+
+    if (!hardware || hardware.quantity_available <= 0) {
+      await database.run("ROLLBACK")
+      return res.status(400).json({ error: "Hardware not avaiable for checkout"})
+    }
+
+    // update quantity of hardware
+    await database.run(
+      "UPDATE Hardware SET quantity_available = quantity_available - 1 WHERE hardware_id = ?",
+      hardware_id
+    );
+
+    // Log the hardware checkout
+    await database.run(
+      "INSERT INTO HardwareLoan (person_id, hardware_id, checkout_time) VALUES (?, ?, datetime('now'))",
+      [user_id, hardware_id]
+  );
+
+    // Commit the transaction
+    await database.run("COMMIT");
   
+    res.json({ message: "Hardware checked out successfully" });
+
+  } catch (error) {
+    console.error(error);
+    await database.run("ROLLBACK")
+    res.json({ error: "Failed to checkout hardware"})
+  }
 });
 
 // Return hardware
 app.post("/hardware/return", async (req, res) => {
   const { loan_id } = req.body;
+  try {
+    await database.run("BEGIN")
+    
+    // get hardware loan info and hardware id
+    const loan = await database.get(
+      "SELECT hardware_id, returned FROM HardwareLoan WHERE loan_id = ?",
+      loan_id
+    );
 
+    if (!loan) {
+      await database.run("ROLLBACK")
+      return res.status(400).json({ error: "Hardware loan not found"})
+    }
+
+    if (loan.returned) {
+      await database.run("ROLLBACK")
+      return res.status(400).json({ error: "Hardware already returned"})
+    }
+
+    // update quantity of hardware
+    await database.run(
+      "UPDATE Hardware SET quantity_available = quantity_available + 1 WHERE hardware_id = ?",
+      loan.hardware_id
+    );
+
+    // Log the hardware return
+    await database.run(
+      "UPDATE HardwareLoan SET return_time = datetime('now'), returned = 1 WHERE loan_id = ?",
+      loan_id
+    );
+
+    // Commit the transaction
+    await database.run("COMMIT");
+
+    res.json({ message: "Hardware returned successfully" });
+  } catch (error) {
+    console.error(error);
+    await database.run("ROLLBACK")
+    res.json({ error: "Failed to return hardware"})
+  
+  }
+
+});
+
+// List all hardware
+app.get("/hardware", async (req, res) => {
+  try {
+    const hardware = await database.all("SELECT * FROM Hardware");
+    console.log(hardware);
+    res.json(hardware);
+  } catch (error) {
+    console.error(error)
+    res.json({ error: "Failed to fetch hardware" });
+  }
+})
+
+app.get("/user/info/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const userInfo = await database.get(
+      "SELECT * FROM person WHERE person_id = ?",
+      id,
+    );
+    // get all hardware loan
+    const hardwareLoans = await database.all(
+      "SELECT * FROM HardwareLoan WHERE person_id = ?",
+      id,
+    );
+    userInfo.hardware_loans = hardwareLoans;
+    res.json(userInfo);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Failed to fetch user info" });
+  }
 });
 
 app.listen(port, () => {

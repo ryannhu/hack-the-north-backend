@@ -1,0 +1,38 @@
+[
+    {
+        "event_name": "Deep Learning for Computer Vision",
+        "event_type": "Tech Workshop",
+        "start_time": "2024-02-14 04:03:53",
+        "end_time": "2024-02-14 07:03:53"
+    },
+    {
+        "event_name": "Intro to Machine Learning",
+        "event_type": "Tech Workshop",
+        "start_time": "2024-02-13 19:54:39",
+        "end_time": "2024-02-13 21:54:39"
+    },
+    {
+        "event_name": "Cloud Computing with AWS",
+        "event_type": "Tech Workshop",
+        "start_time": "2024-02-14 08:06:38",
+        "end_time": "2024-02-14 09:06:38"
+    },
+    {
+        "event_name": "Blockchain Basics",
+        "event_type": "Tech Workshop",
+        "start_time": "2024-02-14 14:54:32",
+        "end_time": "2024-02-14 15:54:32"
+    },
+    {
+        "event_name": "DevOps with Docker and Kubernetes",
+        "event_type": "Tech Workshop",
+        "start_time": "2024-02-15 18:27:25",
+        "end_time": "2024-02-15 21:27:25"
+    },
+    {
+        "event_name": "Building Mobile Apps with Flutter",
+        "event_type": "Tech Workshop",
+        "start_time": "2024-02-15 00:27:58",
+        "end_time": "2024-02-15 02:27:58"
+    }
+]
